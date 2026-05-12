@@ -75,6 +75,8 @@ Patterns:
 
 ## Server-Side SSR API (when using SSR)
 
+How **`PageVM`**, **`onInit(ssr => …)`**, snapshot, and **`ViewModelsStore`** fit together is described in **[`mobx-ssr-hydration`](../mobx-ssr-hydration/SKILL.md)**. This section only covers **contract shapes**.
+
 In-process data access (no HTTP) via an SSR API interface:
 
 ```typescript
@@ -101,7 +103,7 @@ SSR API calls the data layer directly, optionally with caching.
 2. **Client function**: Add `loadXxx` / `putXxx` using fetch
 3. **Server endpoint**: Add handler on the server
 4. **SSR API** (if needed): Add method to SSR interface, create fetch function with caching
-5. **Store/VM**: Use client function in view models, SSR method in `onInit(ssr => ...)` block
+5. **Store/VM**: Client fetch in VMs; SSR methods inside **`onInit(ssr => …)`** when using the stack from **`mobx-ssr-hydration`**
 
 ## Data Mapping
 

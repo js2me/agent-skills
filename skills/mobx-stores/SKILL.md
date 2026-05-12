@@ -1,18 +1,20 @@
 ---
 name: mobx-stores
-description: MobX store patterns — makeObservable, observable collections, async mutations, debounced sync, Globals central container, client-only persistence
+description: MobX domain/state classes — makeObservable, observable collections, async mutations, debounced sync, Globals central container, client-only persistence
 license: MIT
 compatibility: opencode
 ---
 
-# MobX Store Patterns
+# MobX domain state classes
 
-## Store Declaration
+MobX-backed classes that hold app state and side effects are often called “stores” in docs. **Class names should reflect what they represent or do** (`Cart`, `Products`, `Favorites`, `SessionSettings`) — **not** a mechanical `SomethingStore` suffix.
+
+## Declaration
 
 ```typescript
 import { computed, makeObservable, observable } from 'mobx';
 
-export class ExampleStore {
+export class Products {
   // Observable primitives
   isLoading = true;
   error: string | null = null;
@@ -32,27 +34,27 @@ export class ExampleStore {
 }
 ```
 
-### Minimal Store Template Checklist
+### Checklist
 
 - Define observable state fields (primitives + collections).
 - Call `makeObservable(this, { ... })` in constructor.
 - Expose derived data via `computed` getters.
-- Keep async loading/mutations in store methods.
+- Keep async loading/mutations in class methods.
 - Keep network payload-to-state mapping in dedicated helper methods (`applyData`, `applyServerData`).
 
 Key rules:
 - No decorators — configure `useDecorators: false` in `ViewModelStoreBase` options
-- `makeObservable` in constructor for stores, in `didCreate()` or `mount()` for ViewModels
+- `makeObservable` in constructor for these classes; for ViewModels use **`willMount()`** (or your base’s **`mount()`**). SSR stacks that call **`didCreate()`** before mount are covered in **`mobx-ssr-hydration`**.
 - `observable.ref` — primitives and immutable plain objects
 - `observable.shallow` — maps, sets
 - `observable.set()` / `observable.map()` — reactive collections
 - `computed` — derived values
 - `computed.struct` — arrays/objects compared by value (not reference)
 
-## Async Actions & Mutations
+## Async actions & mutations
 
 ```typescript
-class ExampleStore {
+class Products {
   load = async () => {
     this.isLoading = true;
     try {
@@ -78,7 +80,7 @@ class ExampleStore {
 
 - `runInAction` / `action` wrappers are NOT needed — see `mobx-general`
 
-## Observable Collections
+## Observable collections
 
 ```typescript
 // Map — ordered key-value with insertion order tracking
@@ -93,12 +95,12 @@ selectedIds = observable.set<number>();
 addingIds = observable.set<number>();
 ```
 
-## Debounced Server Sync Pattern
+## Debounced server sync pattern
 
 ```typescript
 import { debounce } from 'es-toolkit/function';
 
-class Store {
+class Workspace {
   private readonly syncServer = debounce(async () => {
     this.syncInFlight++;
     const requestId = ++this.syncRequestId;
@@ -122,9 +124,9 @@ class Store {
 
 No `runInAction` wrappers needed — MobX tracks mutations automatically when `enforceActions: 'never'`.
 
-## Globals — Central Application Container
+## Globals — central application container
 
-For SSR applications it's **strongly recommended** to have a central `Globals` class that holds all application context — router, stores, SSR API, and services:
+For SSR applications it's **strongly recommended** to have a central `Globals` class that holds all application context — router, state roots, SSR API, and services:
 
 ```typescript
 export class Globals {
@@ -133,10 +135,10 @@ export class Globals {
 
   readonly router: Router;
   readonly stores: {
-    items: ItemsStore;
-    cart: CartStore;
-    favorites: FavoritesStore;
-    viewModels: ViewModelsStore;
+    products: Products;
+    cart: Cart;
+    favorites: Favorites;
+    viewModels: ViewModels;
   };
 
   constructor(params: GlobalsCreateParams) {
@@ -144,10 +146,10 @@ export class Globals {
     this.isServer = !this.isClient;
     this.router = new Router(params.router);
     this.stores = {
-      items: new ItemsStore(this.router),
-      cart: new CartStore(this.router),
-      favorites: new FavoritesStore(),
-      viewModels: new ViewModelsStore(this, params.pageContexts),
+      products: new Products(this.router),
+      cart: new Cart(this.router),
+      favorites: new Favorites(),
+      viewModels: new ViewModels(this, params.pageContexts),
     };
   }
 
@@ -169,31 +171,33 @@ export class Globals {
 ```
 
 Why `Globals` is essential:
-- **SSR**: Each request gets its own instance with isolated stores and memory history
+- **SSR**: Each request gets its own instance with isolated state and memory history
 - **Hydration**: `Globals.fromSnapshot(window.__SSR_DATA__)` restores server state on client
 - **DI without React context**: ViewModels receive `Globals` in constructor — no Context providers
-- **Per-request isolation**: Fresh stores for every SSR request, no data leaks between users
+- **Per-request isolation**: Fresh roots for every SSR request, no data leaks between users
 
 For CSR-only projects `Globals` is optional but still useful as a single source of truth (can be a singleton instead of per-request).
 
-## Store Composition
+The `stores` field name is a common bucket for these roots; keys (`products`, `cart`, …) should match **domain** names, not `productsStore`.
 
-Stores are instantiated in the `Globals` constructor and accessed via `globals.stores.<name>`:
+## Composition & access
+
+Roots are created in the `Globals` constructor and reached via `globals.stores.<key>` (or rename the bucket to `roots` / `models` if the project prefers):
 
 ```typescript
 // In any VM:
-this.globals.stores.items.method()
+this.globals.stores.products.method()
 this.globals.stores.cart.property
 ```
 
-Stores receive only their direct dependencies. They can reference each other through the container.
+Each class receives only its direct dependencies. They can reference each other through the container.
 
-## Client-Only Persistence
+## Client-only persistence
 
 ```typescript
 import { storageData } from 'mobx-web-api';
 
-class FavoritesStore {
+class Favorites {
   private readonly storedIds = storageData.key<number[]>(
     'favoriteIds',
     [],      // default

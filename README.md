@@ -46,12 +46,12 @@ npx skills add . -a cursor -a codex -y
 
 | Папка | О чём |
 |-------|--------|
-| [mvvm-architecture](skills/mvvm-architecture/SKILL.md) | MVVM, ViewModel, страницы |
+| [mvvm-architecture](skills/mvvm-architecture/SKILL.md) | MVVM, ViewModel, `withViewModel` |
+| [mobx-ssr-hydration](skills/mobx-ssr-hydration/SKILL.md) | кастомный SSR и гидратация: PageVM, снапшот |
 | [mobx-general](skills/mobx-general/SKILL.md) | базовые правила MobX |
 | [mobx-stores](skills/mobx-stores/SKILL.md) | сторы, Globals |
 | [mobx-web-api](skills/mobx-web-api/SKILL.md) | storage и др. в браузере |
 | [api-data-contracts](skills/api-data-contracts/SKILL.md) | типы DC, fetch, API |
-| [ssr-hydration](skills/ssr-hydration/SKILL.md) | SSR и гидратация |
 | [routing-navigation](skills/routing-navigation/SKILL.md) | роутинг |
 | [ui-components](skills/ui-components/SKILL.md) | UI-компоненты и стили |
 

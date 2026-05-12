@@ -6,18 +6,18 @@
 
 1. **Перед задачей** определи тему (UI, роутинг, SSR, MobX, API).
 2. **Открой соответствующий** `skills/<topic>/SKILL.md` и следуй описанным там паттернам и запретам.
-3. Если темы пересекаются (например, страница + SSR + роутинг), прочитай **несколько** навыков в порядке: архитектура → данные → конкретная область.
+3. Если темы пересекаются (например, страница + SSR + роутинг), прочитай **несколько** навыков в порядке: архитектура → **mobx-ssr-hydration** (если нужен кастомный SSR-стек) → данные → конкретная область.
 
 ## Оглавление навыков
 
 | Путь | Когда читать |
 |------|----------------|
-| [`skills/mvvm-architecture/SKILL.md`](skills/mvvm-architecture/SKILL.md) | MVVM, `withViewModel`, иерархия VM/PageVM, lifecycle, структура файлов |
+| [`skills/mvvm-architecture/SKILL.md`](skills/mvvm-architecture/SKILL.md) | MVVM, `withViewModel`, иерархия VM, `willMount`, структура файлов |
+| [`skills/mobx-ssr-hydration/SKILL.md`](skills/mobx-ssr-hydration/SKILL.md) | Кастомный SSR и гидратация: `PageVM`, `onInit` / `initOnServer` / `ctx`, `ViewModelsStore` + `didCreate`, снапшот |
 | [`skills/mobx-general/SKILL.md`](skills/mobx-general/SKILL.md) | Базовые правила MobX: `enforceActions: 'never'`, без лишних `action`/`runInAction` |
 | [`skills/mobx-stores/SKILL.md`](skills/mobx-stores/SKILL.md) | Сторы: `makeObservable`, коллекции, async, debounced sync, `Globals` |
 | [`skills/mobx-web-api/SKILL.md`](skills/mobx-web-api/SKILL.md) | Реактивные обёртки над Web API (storage, URL, cookies) |
 | [`skills/api-data-contracts/SKILL.md`](skills/api-data-contracts/SKILL.md) | DC-типы, `fetch`, SSR API, добавление эндпоинтов, маппинг в UI |
-| [`skills/ssr-hydration/SKILL.md`](skills/ssr-hydration/SKILL.md) | SSR/гидратация, PageVM, `SSRApi`, снапшот, антипаттерны |
 | [`skills/routing-navigation/SKILL.md`](skills/routing-navigation/SKILL.md) | `mobx-route`, история, query params, навигация, 404 |
 | [`skills/ui-components/SKILL.md`](skills/ui-components/SKILL.md) | Презентационные компоненты, `ClientOnly`, ActionButton, стили |
 
