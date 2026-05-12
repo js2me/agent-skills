@@ -198,6 +198,17 @@ export class ChildVM extends ViewModelBase<{}, ParentVM> {
 
 Prefer **composition** + **`Globals`** when possible — fewer hard dependencies on a specific parent VM class.
 
+### Avoid deep `parentViewModel` chains
+
+Long chains like **`this.parentViewModel.parentViewModel.parentViewModel`** are a smell: they encode **implicit navigation** through the UI tree, break when the hierarchy moves, and couple the child to many concrete parent types.
+
+Prefer one of these instead:
+
+- **One hop only**: if a child VM needs the parent, use **`this.parentViewModel`** for the **immediate** parent and expose deeper data **through that parent** (methods or small read-only props), not by walking the chain.
+- **`Globals` / stores**: shared reads and writes live in **`this.globals.stores…`** (or services on **`Globals`**) so any VM depth can access the same source of truth without knowing ancestors.
+- **Explicit injection**: pass **`Globals`**, a **narrow interface** (callbacks or facades), or a **dedicated coordinator** into the child’s constructor when wiring sub-models — same idea as “constructor deps, not locator chains.”
+- **Lift coordination**: if several nested VMs must collaborate, move orchestration to a **store** or a **single parent VM** that owns the subtree; children stay shallow.
+
 Full **`mobx-view-model`** reference: https://js2me.github.io/mobx-view-model/llms-full.txt
 
 ## Prohibited patterns
@@ -205,4 +216,5 @@ Full **`mobx-view-model`** reference: https://js2me.github.io/mobx-view-model/ll
 - ❌ `useState` / `useEffect` / `useCallback` for business logic  
 - ❌ Fetching or mutating domain state in components  
 - ❌ Derived state in components  
+- ❌ Deep **`parentViewModel.parentViewModel…`** chains — use **`Globals`/stores**, **explicit deps**, or **one parent** that exposes what children need  
 - ✅ State, async work, and computations in the VM  
